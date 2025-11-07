@@ -1,0 +1,687 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>IF Morenica Dashboard</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" />
+  <style>
+    :root {
+      --main-bg: #f5f8fc;
+      --accent: #1765bb;
+      --accent-hover: #2d9bec;
+      --accent-glow: rgba(23,101,187,0.36);
+      --nav-bg: #fff;
+      --nav-text: #1765bb;
+      --nav-border: #e0e8f3;
+      --link-text: #1765bb;
+      --link-bg: #e0e8f3;
+      --link-hover-bg: #2d9bec;
+      --link-hover-text: #fff;
+      --card-bg: #fff;
+      --card-radius: 16px;
+      --card-shadow: 0 2px 14px rgba(23,101,187,0.09);
+      --card-shadow-glow: 0 0 18px var(--accent-glow);
+      --magazzino-accent: #1ea861;
+      --magazzino-bg: #e3f6e9;
+      --magazzino-border: #cbeed7;
+      --magazzino-hover: #58ddae;
+      --magazzino-glow: rgba(30,168,97,0.26);
+      --text-main: #1a2533;
+      --text-light: #6d7d99;
+      --details-secondary: #407ab2;
+      --footer-color: #6d7d99;
+      --table-header-bg: #1765bb;
+      --table-header-text: #fff;
+      --table-row-bg: #f7fafc;
+      --table-row-text: #1a2533;
+      --table-row-hover-bg: #e0e8f3;
+      --table-row-hover-shadow: 0 0 13px var(--accent-glow);
+    }
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: var(--main-bg);
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      transition: background 0.2s, color 0.2s;
+    }
+    nav {
+      background: var(--nav-bg);
+      border-bottom: 2px solid var(--nav-border);
+      box-shadow: 0 2px 10px rgba(23,101,187,.05);
+      display: flex;
+      align-items: center;
+      padding: 0 20px;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      min-height: 62px;
+      transition: background 0.2s, color 0.2s;
+    }
+    nav .logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: bold;
+      color: var(--accent);
+      font-size: 1.12em;
+      transition: color 0.2s;
+    }
+    nav .logo img {
+      width: 38px;
+      border-radius: 10px;
+      box-shadow: 0 2px 8px rgba(23,101,187,.10);
+      background: var(--card-bg);
+      transition: background 0.2s;
+    }
+    nav .navlinks {
+      margin-left: auto;
+      display: flex;
+      gap: 13px;
+    }
+    nav .navlinks a {
+      text-decoration: none;
+      color: var(--nav-text);
+      padding: 12px 22px;
+      font-weight: 500;
+      border-radius: 8px;
+      font-size: 1em;
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      transition: background .17s, color .17s, box-shadow .2s;
+    }
+    nav .navlinks a:hover, nav .navlinks a.active {
+      background: var(--accent-hover);
+      color: var(--link-hover-text);
+      box-shadow: var(--card-shadow-glow);
+      outline: none;
+    }
+    nav .right {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-left: 14px;
+    }
+    .theme-toggle {
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      font-size: 1.18em;
+      padding: 7px 10px 7px 9px;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background .18s, box-shadow .2s;
+      box-shadow: 0 2px 7px rgba(23,101,187,.09);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .theme-toggle:hover { background: var(--accent-hover); box-shadow: var(--card-shadow-glow);}
+    main {
+      flex: 1;
+      padding: 34px 0 0 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .dashboard {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(255px, 1fr));
+      gap: 28px;
+      width: 99vw;
+      max-width: 1100px;
+      margin-bottom: 38px;
+    }
+    .group-card {
+      background: var(--card-bg);
+      border-radius: var(--card-radius);
+      box-shadow: var(--card-shadow);
+      padding: 19px 16px 17px 16px;
+      display: flex;
+      flex-direction: column;
+      min-height: 210px;
+      transition: box-shadow .17s, background 0.2s, color 0.2s;
+    }
+    .group-card:hover {
+      box-shadow: var(--card-shadow-glow), 0 8px 36px rgba(23,101,187,.17);
+    }
+    .group-title {
+      font-size: 1.08em;
+      font-weight: bold;
+      color: var(--accent);
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      letter-spacing: .3px;
+      transition: color 0.2s;
+    }
+    .links-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+    .links-list li {
+      margin-bottom: 9px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .links-list a {
+      text-decoration: none;
+      color: var(--link-text);
+      background: var(--link-bg);
+      padding: 7px 17px;
+      border-radius: 6px;
+      font-weight: 500;
+      font-size: 1em;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: background .18s, color .18s, box-shadow .2s;
+    }
+    .links-list a:hover {
+      background: var(--link-hover-bg);
+      color: var(--link-hover-text);
+      box-shadow: var(--card-shadow-glow);
+    }
+    .icon { font-size: 1.1em; color: var(--accent); }
+    .magazzino-card {
+      background: var(--magazzino-bg);
+      border-radius: var(--card-radius);
+      box-shadow: var(--card-shadow);
+      padding: 19px 16px 17px 16px;
+      display: flex;
+      flex-direction: column;
+      min-height: 170px;
+      transition: box-shadow .17s, background 0.2s, color 0.2s;
+      grid-column: 1/-1;
+      margin-top: 6px;
+    }
+    .magazzino-card:hover {
+      box-shadow: 0 0 20px var(--magazzino-glow);
+    }
+    .magazzino-title {
+      font-size: 1.08em;
+      font-weight: bold;
+      color: var(--magazzino-accent);
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      letter-spacing: .3px;
+      transition: color 0.2s;
+    }
+    .magazzino-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      display: flex;
+      flex-direction: row;
+      gap: 15px;
+      flex-wrap: wrap;
+    }
+    .magazzino-list li {
+      display: flex;
+      align-items: center;
+    }
+    .magazzino-list a {
+      text-decoration: none;
+      color: var(--magazzino-accent);
+      background: var(--magazzino-bg);
+      padding: 8px 18px;
+      border-radius: 8px;
+      font-weight: 500;
+      font-size: 1em;
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      border: 1px solid var(--magazzino-border);
+      transition: background .17s, color .17s, box-shadow .2s;
+    }
+    .magazzino-list a:hover {
+      background: var(--magazzino-hover);
+      color: #fff;
+      border-color: var(--magazzino-hover);
+      box-shadow: 0 0 13px var(--magazzino-glow);
+    }
+    .mag-icon { font-size: 1.13em; color: var(--magazzino-accent); }
+    .rubrica-card {
+      margin-bottom: 38px;
+      background: var(--card-bg);
+      border-radius: var(--card-radius);
+      box-shadow: var(--card-shadow);
+      padding: 24px 16px;
+      max-width: 820px;
+      width: 97vw;
+      transition: background 0.2s, color 0.2s;
+    }
+    .rubrica-card:hover {
+      box-shadow: var(--card-shadow-glow);
+    }
+    .rubrica-top {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: bold;
+      color: var(--accent);
+      font-size: 1.1em;
+      margin-bottom: 14px;
+      transition: color 0.2s;
+    }
+    .rubrica-buttons {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 17px;
+    }
+    .rubrica-buttons button {
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      font-weight: 500;
+      padding: 7px 16px;
+      border-radius: 7px;
+      font-size: 0.99em;
+      cursor: pointer;
+      transition: background .16s, box-shadow .2s;
+      box-shadow: 0 2px 7px rgba(23,101,187,.06);
+    }
+    .rubrica-buttons button:hover { background: var(--accent-hover); box-shadow: var(--card-shadow-glow); }
+    .rubrica-table {
+      width: 100%;
+      border-collapse: collapse;
+      background: #fff;
+      border-radius: 9px;
+      box-shadow: 0 1px 6px rgba(23,101,187,.06);
+      overflow: hidden;
+      font-size: 1em;
+      transition: background 0.2s, color 0.2s;
+    }
+    .rubrica-table th, .rubrica-table td {
+      padding: 11px 6px;
+      text-align: left;
+      border-bottom: 1px solid var(--nav-border);
+      min-width: 100px;
+      vertical-align: middle;
+      background: #fff;
+      color: var(--table-row-text);
+      transition: background 0.2s, color 0.2s;
+    }
+    .rubrica-table thead th {
+      background: var(--table-header-bg);
+      color: var(--table-header-text);
+      border: none;
+      font-weight: bold;
+      font-size: 1.03em;
+      transition: background 0.2s, color 0.2s;
+    }
+    .rubrica-table tr:nth-child(even) td { background-color: var(--table-row-bg); }
+    .rubrica-table tr:hover td {
+      background: var(--table-row-hover-bg);
+      box-shadow: var(--table-row-hover-shadow);
+      color: var(--accent);
+    }
+    .rubrica-table td a { color: var(--accent); text-decoration: none; }
+    .documents-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(285px, 1fr));
+      gap: 32px;
+      width: 97vw;
+      max-width: 900px;
+      margin: 25px auto 0 auto;
+    }
+    .doc-card {
+      background: var(--card-bg);
+      border-radius: var(--card-radius);
+      box-shadow: var(--card-shadow);
+      padding: 28px 18px 24px 18px;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      min-height: 140px;
+      border: 1.5px solid var(--nav-border);
+      transition: box-shadow .17s, background 0.2s, color 0.2s;
+    }
+    .doc-card:hover {
+      box-shadow: var(--card-shadow-glow), 0 8px 36px rgba(23,101,187,.13);
+    }
+    .doc-title {
+      font-size: 1.13em;
+      font-weight: 600;
+      color: var(--accent);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      transition: color 0.2s;
+    }
+    .doc-desc {
+      color: var(--details-secondary);
+      font-size: 1em;
+      margin-top: 8px;
+      margin-bottom: 16px;
+      line-height: 1.45;
+      transition: color 0.2s;
+    }
+    .doc-link {
+      text-decoration: none;
+      color: var(--link-text);
+      background: var(--link-bg);
+      padding: 8px 20px;
+      border-radius: 8px;
+      font-weight: 500;
+      font-size: 1em;
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      transition: background .18s, color .18s, box-shadow .2s;
+      border: 2px solid var(--accent);
+    }
+    .doc-link:hover {
+      background: var(--accent-hover);
+      color: var(--link-hover-text);
+      box-shadow: var(--card-shadow-glow);
+    }
+    .page-title {
+      margin-top: 12px;
+      font-size: 2em;
+      font-weight: 600;
+      color: var(--accent);
+      text-align: center;
+      transition: color 0.2s;
+    }
+    @media (max-width: 1024px) {
+      .dashboard { gap: 20px; }
+      nav .navlinks a { font-size: 1em; padding: 10px 10px; }
+      main { padding-top: 20px; }
+      .magazzino-list { gap: 10px;}
+      .documents-container { gap: 19px;}
+    }
+    @media (max-width: 700px) {
+      .dashboard { grid-template-columns: 1fr; gap: 13px; margin: 0;}
+      .group-card, .magazzino-card { min-height: auto; padding: 12px 7px; }
+      .group-title, .magazzino-title { font-size: 1em; margin-bottom: 8px;}
+      .links-list li, .magazzino-list li { margin-bottom: 5px; }
+      .links-list a, .magazzino-list a { font-size: .97em; padding: 7px 11px; }
+      .magazzino-list { gap:6px; flex-direction:column;}
+      .rubrica-card { padding: 13px 2px; max-width: 99vw;}
+      .rubrica-table th, .rubrica-table td { padding: 8px 3px; font-size: 0.95em;}
+      .documents-container { grid-template-columns: 1fr;}
+      .doc-card { min-height: auto; padding: 17px 6px;}
+      .doc-title { font-size: 1em;}
+      .page-title { font-size: 1.5em; }
+    }
+    footer {
+      margin-top: 25px;
+      padding-bottom: 20px;
+      color: var(--footer-color);
+      text-align: center;
+      font-size: 0.96em;
+      background: none;
+      transition: color 0.2s;
+    }
+    :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+    /* DARK MODE OVERRIDES */
+    body.dark {
+      --main-bg: #202734;
+      --accent: #66aaff;
+      --accent-hover: #1ea861;
+      --accent-glow: rgba(102,170,255,0.36);
+      --nav-bg: #181e29;
+      --nav-text: #e3eafc;
+      --nav-border: #263148;
+      --link-text: #66aaff;
+      --link-bg: #263148;
+      --link-hover-bg: #3479cb;
+      --link-hover-text: #fff;
+      --card-bg: #232940;
+      --card-shadow: 0 2px 20px rgba(102,170,255,0.09);
+      --card-shadow-glow: 0 0 18px var(--accent-glow);
+      --magazzino-accent: #1ea861;
+      --magazzino-bg: #283345;
+      --magazzino-border: #52c89c;
+      --magazzino-hover: #52c89c;
+      --magazzino-glow: rgba(82,200,156,0.26);
+      --text-main: #e3eafc;
+      --text-light: #9bafd1;
+      --details-secondary: #b7c5e6;
+      --footer-color: #9bafd1;
+      --table-header-bg: #66aaff;
+      --table-header-text: #181e29;
+      --table-row-bg: #223768;
+      --table-row-text: #e3eafc;
+      --table-row-hover-bg: #1765bb;
+      --table-row-hover-shadow: 0 0 13px var(--accent-glow);
+    }
+  </style>
+</head>
+<body>
+  <nav>
+    <div class="logo">
+      <a href="https://morenica.ciacformazione.it/" target="_blank" title="Visita la pagina Morenica">
+        <img src="logo-if-morenica.png" alt="Logo IF Morenica" />
+      </a>
+      IF Morenica
+    </div>
+    <div class="navlinks">
+      <a href="#home" class="active"><i class="fas fa-home"></i>Home</a>
+      <a href="#moduli"><i class="fas fa-clipboard-list"></i>Moduli</a>
+      <a href="#rubrica"><i class="fas fa-address-book"></i>Rubrica</a>
+      <a href="#documenti"><i class="fas fa-file-alt"></i>Documenti</a>
+    </div>
+    <div class="right">
+      <button class="theme-toggle" id="toggleTheme" title="Tema chiaro/scuro">
+        <i class="fa-solid fa-moon" id="themeIcon"></i>
+      </button>
+    </div>
+  </nav>
+  <main>
+    <!-- HOME -->
+    <section id="home" class="section" style="display:block;">
+      <div class="dashboard">
+        <div class="group-card">
+          <div class="group-title"><i class="fas fa-utensils icon"></i> CU2</div>
+          <ul class="links-list">
+            <li><a href="https://docs.google.com/forms/d/e/1FAIpQLSeL3d2tG_LJBoFGZRMtja8Fw2T-YdJYpFqP9vxzV1EQkWLqgA/viewform?usp=preview" target="_blank"><i class="fa-regular fa-clipboard icon"></i> Mansionario</a></li>
+            <li><a href="https://docs.google.com/spreadsheets/d/1udHRV7NABlQqXwg0YME_OPlh6MEypV2BYU61klHcGYg/edit?gid=416127631" target="_blank"><i class="fa-regular fa-calendar icon"></i> Planning Cucina</a></li>
+          </ul>
+        </div>
+        <div class="group-card">
+          <div class="group-title"><i class="fas fa-utensils icon"></i> CU3</div>
+          <ul class="links-list">
+            <li><a href="https://docs.google.com/forms/d/e/1FAIpQLSe_RC3JERwrex_yLD3B1xUOX4ZhbvV9PNIVZhdW3viCEWwr2w/viewform?usp=preview" target="_blank"><i class="fa-regular fa-clipboard icon"></i> Mansionario</a></li>
+            <li><a href="https://docs.google.com/spreadsheets/d/1lbXQfxp9VbIkd1B3HMjPzF8VRhXRwLi18T4mO8mv9_I/edit?gid=416127631" target="_blank"><i class="fa-regular fa-calendar icon"></i> Planning Cucina</a></li>
+          </ul>
+        </div>
+        <div class="group-card">
+          <div class="group-title"><i class="fas fa-mug-hot icon"></i> SA2</div>
+          <ul class="links-list">
+            <li><a href="https://docs.google.com/forms/d/e/1FAIpQLSdyzCrSAflfGMiF9oMkObFREBlTEaXdIajdPLyW-g2l2gYiXg/viewform?usp=preview" target="_blank"><i class="fa-regular fa-clipboard icon"></i> Mansionario</a></li>
+            <li><a href="https://docs.google.com/spreadsheets/d/1ouUrwe3to5uqCE6fhVoIUMi9jqVLzqMqobn1kVp8CzY/edit#gid=2091501833" target="_blank"><i class="fa-regular fa-calendar icon"></i> Planning Sala/Bar</a></li>
+          </ul>
+        </div>
+        <div class="group-card">
+          <div class="group-title"><i class="fas fa-mug-hot icon"></i> SA3</div>
+          <ul class="links-list">
+            <li><a href="https://docs.google.com/forms/d/e/1FAIpQLSdrxn7bkCEtNZJxtdg29HI4JTnqC4_mXsEJKHZ1xAuurpWRYw/viewform?usp=preview" target="_blank"><i class="fa-regular fa-clipboard icon"></i> Mansionario</a></li>
+            <li><a href="https://docs.google.com/spreadsheets/d/1ouUrwe3to5uqCE6fhVoIUMi9jqVLzqMqobn1kVp8CzY/edit#gid=2091501833" target="_blank"><i class="fa-regular fa-calendar icon"></i> Planning Sala/Bar</a></li>
+          </ul>
+        </div>
+        <!-- Magazzino card unica -->
+        <div class="magazzino-card">
+          <div class="magazzino-title"><i class="fa-solid fa-warehouse mag-icon"></i> Magazzino</div>
+          <ul class="magazzino-list">
+            <li><a href="https://script.google.com/a/macros/ciacdidattica.it/s/AKfycby6dPcHbM_rg_8_uLUt8nPcZ9ZG6CDA8pBxrac7RRk/dev?authuser=0" target="_blank"><i class="fa-solid fa-box mag-icon"></i> Cucina</a></li>
+            <li><a href="https://script.google.com/a/macros/ciacdidattica.it/s/AKfycbzSEwy-1DO6uUlMmRsNUj5CoXZEzaBuSnf9kqqA0N0/dev?authuser=0" target="_blank"><i class="fa-solid fa-cocktail mag-icon"></i> Sala/Bar</a></li>
+	    <li><a href="https://script.google.com/a/macros/ciacdidattica.it/s/AKfycbxmjLzCKGbUm8vCIw0mtMHMMTCevwWHjfriXc5Xbh3v/dev?authuser=0" target="_blank"><i class="fa-solid fa-wine-bottle mag-icon"></i> Giacenza vini/bevande sala</a></li>
+          </ul>
+        </div>
+      </div>
+    </section>
+    <!-- MODULI -->
+    <section id="moduli" class="section" style="display:none;">
+      <div class="dashboard">
+        <div class="group-card">
+          <div class="group-title"><i class="fas fa-mug-hot icon"></i> SA2</div>
+          <ul class="links-list">
+            <li><a href="https://docs.google.com/forms/d/e/1FAIpQLScr3TRwGSRA5nudP8pzvn_48AyM-bL4fMFz2ph9IokOyeENCA/viewform?usp=preview" target="_blank"><i class="fa-regular fa-clipboard icon"></i> Valutazione Docenti SA2</a></li>
+          </ul>
+        </div>
+        <div class="group-card">
+          <div class="group-title"><i class="fas fa-mug-hot icon"></i> SA3</div>
+          <ul class="links-list">
+            <li><a href="https://docs.google.com/forms/d/e/1FAIpQLSdXjwLSIYfgDBnIdAPEIDQNxS_UubSuovXA-C0e2FLJ02t5og/viewform?usp=preview" target="_blank"><i class="fa-regular fa-clipboard icon"></i> Valutazione Docenti SA3</a></li>
+          </ul>
+        </div>
+        <div class="group-card">
+          <div class="group-title"><i class="fas fa-utensils icon"></i> CU2</div>
+          <ul class="links-list">
+            <li><a href="https://docs.google.com/forms/d/e/1FAIpQLSfvO7tBOojOSXetHEgTx30sx8__JRsi-CXP0CyDZ7qGeFJmYA/viewform?usp=preview" target="_blank"><i class="fa-regular fa-clipboard icon"></i> Valutazione Docenti CU2</a></li>
+          </ul>
+        </div>
+        <div class="group-card">
+          <div class="group-title"><i class="fas fa-utensils icon"></i> CU3</div>
+          <ul class="links-list">
+            <li><a href="https://docs.google.com/forms/d/e/1FAIpQLSfvO7tBOojOSXetHEgTx30sx8__JRsi-CXP0CyDZ7qGeFJmYA/viewform?usp=preview" target="_blank"><i class="fa-regular fa-clipboard icon"></i> Valutazione Docenti CU3</a></li>
+          </ul>
+        </div>
+      </div>
+    </section>
+    <!-- RUBRICA -->
+    <section id="rubrica" class="section" style="display:none;">
+      <div class="rubrica-card">
+        <div class="rubrica-top"><i class="fa-solid fa-address-book"></i> Rubrica Telefonica IF Morenica</div>
+        <div class="rubrica-buttons">
+          <button onclick="aggiungiContatto()">➕ Aggiungi</button>
+          <button onclick="eliminaContatto()">🗑️ Elimina</button>
+        </div>
+        <table id="tabellaRubrica" class="rubrica-table" summary="Tabella con i contatti telefonici di IF Morenica">
+          <thead>
+            <tr>
+              <th>Nome</th>
+              <th>Ruolo</th>
+              <th>Telefono</th>
+              <th>Email</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Mario Rossi</td>
+              <td>Direttore</td>
+              <td>+39 333 1234567</td>
+              <td><a href="mailto:mario.rossi@ciacformazione.it">mario.rossi@ciacformazione.it</a></td>
+            </tr>
+            <tr>
+              <td>Laura Bianchi</td>
+              <td>Segreteria</td>
+              <td>+39 334 7654321</td>
+              <td><a href="mailto:laura.bianchi@ciacformazione.it">laura.bianchi@ciacformazione.it</a></td>
+            </tr>
+            <tr>
+              <td>Andrea Verdi</td>
+              <td>Coordinatore Didattico</td>
+              <td>+39 320 4567890</td>
+              <td><a href="mailto:andrea.verdi@ciacformazione.it">andrea.verdi@ciacformazione.it</a></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+    <!-- DOCUMENTI -->
+    <section id="documenti" class="section" style="display:none;">
+      <div class="page-title"><i class="fas fa-file-alt"></i> Documenti</div>
+      <div class="documents-container">
+        <div class="doc-card">
+          <div class="doc-title"><i class="fas fa-clipboard icon"></i> PASTI PERSONALE 2025-26</div>
+          <div class="doc-desc">
+            Modulo consumi pasti non incassati.
+          </div>
+          <a class="doc-link" href="https://docs.google.com/forms/d/e/1FAIpQLSd0t0zNarR7GB7i9OD-3IK2LrekNm-lY_FaVV5f6QzQtLjclg/viewform?usp=publish-editor" target="_blank"><i class="fa-solid fa-download"></i>Visualizza/Compila</a>
+        </div>
+        <div class="doc-card">
+          <div class="doc-title"><i class="fa-regular fa-calendar icon"></i> Planning annuali</div>
+          <div class="doc-desc">
+            Documenti di pianificazione attività per cucina e sala/bar suddivisi per gruppi.
+          </div>
+          <a class="doc-link" href="https://drive.google.com/drive/folders/XXX_planning" target="_blank"><i class="fa-solid fa-download"></i>Scarica / Consulta</a>
+        </div>
+        <div class="doc-card">
+          <div class="doc-title"><i class="fa-solid fa-cube icon"></i> Magazzini</div>
+          <div class="doc-desc">
+            Storico movimenti magazzino cucina/sala-bar ed estratti PDF per archiviazione.
+          </div>
+          <a class="doc-link" href="https://drive.google.com/drive/folders/XXX_magazzino" target="_blank"><i class="fa-solid fa-download"></i>Scarica / Consulta</a>
+        </div>
+        <div class="doc-card">
+          <div class="doc-title"><i class="fa-solid fa-file-lines icon"></i> Altri Documenti</div>
+          <div class="doc-desc">
+            Verbali, circolari, comunicazioni ufficiali e materiale didattico generico.
+          </div>
+          <a class="doc-link" href="https://drive.google.com/drive/folders/XXX_varie" target="_blank"><i class="fa-solid fa-download"></i>Scarica / Consulta</a>
+        </div>
+      </div>
+    </section>
+  </main>
+  <footer>
+    <p>© 2025 IF Morenica - Tutti i diritti riservati</p>
+  </footer>
+  <script>
+    function showSection(id) {
+      document.querySelectorAll('.section').forEach(sec => sec.style.display = 'none');
+      if (id) document.getElementById(id).style.display = 'block';
+      document.querySelectorAll('nav .navlinks a').forEach(a=>a.classList.remove('active'));
+      if (id) {
+        document.querySelector('nav .navlinks a[href="#'+id+'"]').classList.add('active');
+      } else {
+        document.querySelector('nav .navlinks a[href="#home"]').classList.add('active');
+      }
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+    function aggiungiContatto() {
+      const nome = prompt("Nome:"); const ruolo = prompt("Ruolo:");
+      const telefono = prompt("Telefono:"); const email = prompt("Email:");
+      if (nome && ruolo && telefono && email) {
+        const tabella = document.getElementById("tabellaRubrica").getElementsByTagName("tbody")[0];
+        const nuovaRiga = tabella.insertRow(-1);
+        nuovaRiga.insertCell(0).innerText = nome;
+        nuovaRiga.insertCell(1).innerText = ruolo;
+        nuovaRiga.insertCell(2).innerText = telefono;
+        nuovaRiga.insertCell(3).innerHTML = `<a href="mailto:${email}">${email}</a>`;
+      } else { alert("Tutti i campi sono obbligatori."); }
+    }
+    function eliminaContatto() {
+      const tabella = document.getElementById("tabellaRubrica").getElementsByTagName("tbody")[0];
+      const nome = prompt("Nome del contatto da eliminare:");
+      if (!nome) { alert("Nome non inserito."); return; }
+      let eliminato = false;
+      for (let i = 0; i < tabella.rows.length; i++) {
+        if (tabella.rows[i].cells[0].innerText.toLowerCase() === nome.toLowerCase()) {
+          tabella.deleteRow(i); eliminato = true; break;
+        }
+      }
+      if (!eliminato) alert("Contatto non trovato.");
+    }
+    window.onload = function() {
+      showSection('home');
+      document.querySelectorAll('nav .navlinks a').forEach(a=>{
+        a.addEventListener('click', function(e){
+          const sec = this.getAttribute('href').replace('#','');
+          if(document.getElementById(sec)) {
+            e.preventDefault();
+            showSection(sec);
+          }
+        });
+      });
+      document.getElementById('toggleTheme').addEventListener('click', function() {
+        document.body.classList.toggle('dark');
+        document.getElementById("themeIcon").classList.toggle("fa-moon");
+        document.getElementById("themeIcon").classList.toggle("fa-sun");
+      });
+    }
+  </script>
+</body>
+</html>
+
