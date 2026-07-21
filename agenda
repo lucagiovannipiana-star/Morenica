@@ -1,0 +1,878 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Agenda prenotazione ristorante/eventi</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+:root {
+  --primary: #2563eb;
+  --success: #16a34a;
+  --warning: #f59e0b;
+  --danger: #dc2626;
+  --bg: #f1f5f9;
+  --card: #ffffff;
+  --text: #0f172a;
+  --muted: #64748b;
+  --radius: 14px;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); }
+
+header {
+  background: linear-gradient(135deg, #1e293b, #0f172a);
+  color: #fff;
+  padding: 20px 30px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 6px 25px rgba(0,0,0,.15);
+}
+header h1 { font-size: 1.3rem; font-weight: 600; }
+
+.container { padding: 30px; max-width: 1400px; margin: auto; }
+
+.card {
+  background: var(--card);
+  border-radius: var(--radius);
+  padding: 20px;
+  box-shadow: 0 10px 40px rgba(15,23,42,.06);
+  margin-bottom: 25px;
+}
+
+.card-header-flex {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.card h3 { font-size: 1.1rem; font-weight: 600; }
+
+.flex { display: flex; gap: 20px; flex-wrap: wrap; }
+.flex > div { flex: 1; }
+
+input, select, button, textarea {
+  width: 100%;
+  padding: 10px;
+  border-radius: 10px;
+  border: 1px solid #e2e8f0;
+  font-family: inherit;
+}
+
+input[type="color"] {
+  padding: 4px;
+  height: 42px;
+  cursor: pointer;
+}
+
+input:focus, select:focus, textarea:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(37,99,235,.15);
+}
+
+button {
+  background: var(--primary);
+  color: #fff;
+  border: none;
+  cursor: pointer;
+  font-weight: 600;
+  transition: .25s;
+}
+
+button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px rgba(37,99,235,.3);
+}
+
+button:disabled {
+  background: #cbd5e1 !important;
+  cursor: not-allowed !important;
+  transform: none !important;
+  box-shadow: none !important;
+}
+
+button.btn-secondary { background: #e2e8f0; color: var(--text); }
+button.btn-secondary:hover { background: #cbd5e1; box-shadow: none; }
+button.btn-danger { background: var(--danger); }
+
+.view-toggle {
+  display: flex;
+  background: #e2e8f0;
+  padding: 4px;
+  border-radius: 10px;
+  gap: 4px;
+  width: auto;
+}
+
+.view-toggle button {
+  background: transparent;
+  color: var(--muted);
+  padding: 6px 16px;
+  border-radius: 8px;
+  font-size: .85rem;
+  width: auto;
+}
+
+.view-toggle button.active {
+  background: #fff;
+  color: var(--primary);
+  box-shadow: 0 2px 8px rgba(0,0,0,.1);
+}
+
+.kpi { font-size: 1.8rem; font-weight: 700; color: var(--primary); }
+
+#agendaGrid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 12px; }
+
+.day-header-name {
+  text-align: center;
+  font-weight: 600;
+  font-size: .8rem;
+  color: var(--muted);
+  padding-bottom: 5px;
+  text-transform: uppercase;
+}
+
+.day {
+  background: #f8fafc;
+  border-radius: var(--radius);
+  padding: 10px;
+  min-height: 140px;
+  position: relative;
+  border: 1px solid #f1f5f9;
+}
+
+.day.empty { background: transparent; border: none; min-height: 0; }
+.day.closed {
+  border-width: 2px;
+}
+
+.closed-badge {
+  color: #fff;
+  font-size: .7rem;
+  padding: 3px 8px;
+  border-radius: 6px;
+  margin-top: 4px;
+  text-align: center;
+  font-weight: 600;
+  box-shadow: 0 2px 4px rgba(0,0,0,.1);
+}
+
+.day h4 { text-align: center; margin-bottom: 8px; color: var(--muted); font-weight: 600; font-size: .85rem; }
+.day.today { background: #eff6ff; border-color: #bfdbfe; }
+.day.today h4 { color: var(--primary); font-weight: 700; }
+.day.dragover { background: #e0f2fe; transform: scale(1.02); }
+
+.booking {
+  background: var(--primary);
+  color: #fff;
+  padding: 6px 8px;
+  border-radius: 8px;
+  margin-bottom: 6px;
+  cursor: pointer;
+  font-size: .78rem;
+  border: 2px solid transparent;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.booking.confirmed { background: var(--success); }
+.booking.pending { background: var(--warning); color: #000; }
+.booking.rejected { background: var(--danger); }
+.booking.selected { border-color: #000; box-shadow: 0 0 0 2px rgba(0,0,0,.3); }
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 15px;
+}
+
+.form-item label {
+  font-size: .75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: var(--muted);
+  display: block;
+  margin-bottom: 4px;
+}
+
+.form-actions { display: flex; gap: 10px; margin-top: 15px; justify-content: flex-end; }
+.form-actions button { width: auto; padding: 10px 20px; }
+
+.empty-state { color: var(--muted); font-size: .9rem; font-style: italic; padding: 10px 0; }
+
+.closure-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #f8fafc;
+  padding: 8px 12px;
+  border-radius: 8px;
+  margin-bottom: 6px;
+  font-size: .85rem;
+}
+
+.closure-color-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  display: inline-block;
+  margin-right: 6px;
+  vertical-align: middle;
+}
+
+.closure-item button { width: auto; padding: 4px 10px; font-size: .75rem; }
+
+.closure-warning-banner {
+  display: none;
+  background: #fef2f2;
+  color: var(--danger);
+  border: 1px solid #fecaca;
+  padding: 12px 16px;
+  border-radius: 10px;
+  margin-bottom: 15px;
+  font-weight: 600;
+  font-size: .9rem;
+  align-items: center;
+  gap: 8px;
+}
+
+#toast {
+  position: fixed;
+  top: 30px;
+  right: 30px;
+  padding: 15px 20px;
+  background: var(--success);
+  color: #fff;
+  border-radius: 12px;
+  display: none;
+  font-weight: 600;
+  box-shadow: 0 20px 40px rgba(0,0,0,.2);
+  z-index: 100;
+}
+</style>
+</head>
+
+<body>
+
+<header>
+  <h1>Agenda prenotazione ristorante/eventi</h1>
+</header>
+
+<div class="container">
+
+  <!-- FILTRO DATA E VISTA -->
+  <div class="card flex" style="align-items: center;">
+    <div>
+      <label style="font-size:.75rem; font-weight:600; color:var(--muted); text-transform:uppercase;">Data di Riferimento</label>
+      <input type="date" id="filterDate" onchange="onFilterDateChange()">
+    </div>
+    <div>
+      <label>&nbsp;</label>
+      <button onclick="fetchData()">Aggiorna Dati</button>
+    </div>
+  </div>
+
+  <!-- KPI COPERTI -->
+  <div class="card flex">
+    <div>
+      <div>Coperti della Data Selezionata</div>
+      <div class="kpi" id="kpiDaySeats">0</div>
+    </div>
+    <div>
+      <div>Coperti Totali Mese Corrente</div>
+      <div class="kpi" id="kpiMonthSeats">0</div>
+    </div>
+  </div>
+
+  <!-- GESTIONE GIORNI DI CHIUSURA -->
+  <div class="card">
+    <h3>🚫 Gestione Giorni di Chiusura / Indisponibilità</h3>
+    <div class="flex" style="margin-top:10px;">
+      <div style="flex:2;">
+        <form onsubmit="addClosure(event)" style="display:flex; gap:10px; align-items:flex-end; flex-wrap:wrap;">
+          <div style="flex:1; min-width:130px;">
+            <label style="font-size:.75rem; font-weight:600; color:var(--muted);">Da Data</label>
+            <input type="date" id="closureStartDate" onchange="syncClosureEndDate()" required>
+          </div>
+          <div style="flex:1; min-width:130px;">
+            <label style="font-size:.75rem; font-weight:600; color:var(--muted);">A Data</label>
+            <input type="date" id="closureEndDate" required>
+          </div>
+          <div style="flex:2; min-width:160px;">
+            <label style="font-size:.75rem; font-weight:600; color:var(--muted);">Motivazione</label>
+            <input type="text" id="closureReason" placeholder="es. Ferie, Lavori" required>
+          </div>
+          <div style="width:70px;">
+            <label style="font-size:.75rem; font-weight:600; color:var(--muted);">Colore</label>
+            <input type="color" id="closureColor" value="#dc2626" title="Scegli colore chiusura">
+          </div>
+          <button type="submit" style="width:auto; padding:10px 20px;">Aggiungi Chiusura</button>
+        </form>
+      </div>
+      <div style="flex:1; max-height:160px; overflow-y:auto;" id="closuresList"></div>
+    </div>
+  </div>
+
+  <!-- FORM NUOVA PRENOTAZIONE -->
+  <div class="card">
+    <h3>➕ Nuova Prenotazione</h3>
+
+    <div id="newBookingClosedWarning" class="closure-warning-banner">
+      🚫 <span><b>Attenzione:</b> L'attività è CHIUSA nella data selezionata. Non è possibile prenotare.</span>
+    </div>
+
+    <form id="newBookingForm" onsubmit="createReservation(event)">
+      <div class="form-grid">
+        <div class="form-item">
+          <label>Nome Cliente</label>
+          <input type="text" id="newName" placeholder="es. Mario Rossi" required>
+        </div>
+        <div class="form-item">
+          <label>Telefono</label>
+          <input type="tel" id="newPhone" placeholder="es. +39 333 1234567">
+        </div>
+        <div class="form-item">
+          <label>N. Coperti</label>
+          <input type="number" id="newNumber" value="2" min="1" required>
+        </div>
+        <div class="form-item">
+          <label>Data</label>
+          <input type="date" id="newDate" onchange="checkFormDateClosure()" required>
+        </div>
+        <div class="form-item">
+          <label>Ora</label>
+          <input type="time" id="newTime" required>
+        </div>
+        <div class="form-item">
+          <label>Stato</label>
+          <select id="newStatus">
+            <option value="confirmed">Confermata</option>
+            <option value="pending" selected>In Attesa</option>
+            <option value="rejected">Rifiutata</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-item" style="margin-top:15px;">
+        <label>Note / Richieste Speciali</label>
+        <input type="text" id="newNotes" placeholder="es. Tavolo all'aperto, allergie...">
+      </div>
+
+      <div class="form-actions">
+        <button type="submit" id="btnSubmitNewBooking">Inserisci Prenotazione</button>
+      </div>
+    </form>
+  </div>
+
+  <!-- VISTA AGENDA -->
+  <div class="card">
+    <div class="card-header-flex">
+      <h3 id="agendaTitle">Agenda Settimanale</h3>
+
+      <div style="display:flex; gap:15px; align-items:center;">
+        <div style="display:none; align-items:center; gap:8px;" id="monthNav">
+          <button class="btn-secondary" style="width:auto; padding:6px 12px;" onclick="changeMonth(-1)">← Prev</button>
+          <span id="currentMonthLabel" style="font-weight:600; font-size:.9rem;"></span>
+          <button class="btn-secondary" style="width:auto; padding:6px 12px;" onclick="changeMonth(1)">Next →</button>
+        </div>
+
+        <div class="view-toggle">
+          <button id="btnWeekView" class="active" onclick="setViewMode('week')">Settimana</button>
+          <button id="btnMonthView" onclick="setViewMode('month')">Mese</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="weekHeaderNames" style="display:grid; grid-template-columns:repeat(7,1fr); gap:12px; margin-bottom:8px;">
+      <div class="day-header-name">Lun</div>
+      <div class="day-header-name">Mar</div>
+      <div class="day-header-name">Mer</div>
+      <div class="day-header-name">Gio</div>
+      <div class="day-header-name">Ven</div>
+      <div class="day-header-name">Sab</div>
+      <div class="day-header-name">Dom</div>
+    </div>
+
+    <div id="agendaGrid"></div>
+  </div>
+
+  <!-- DETTAGLI PRENOTAZIONE SELEZIONATA -->
+  <div class="card">
+    <h3>Dettagli Prenotazione Selezionata</h3>
+    <p id="emptyDetailText" class="empty-state">Clicca su una prenotazione dall'agenda per visualizzarne o modificarne i dettagli.</p>
+
+    <div id="detailBookingClosedWarning" class="closure-warning-banner">
+      🚫 <span><b>Attenzione:</b> La data selezionata risulta un giorno di CHIUSURA.</span>
+    </div>
+
+    <form id="detailForm" style="display:none;" onsubmit="saveDetails(event)">
+      <div class="form-grid">
+        <div class="form-item">
+          <label>Nome Cliente</label>
+          <input type="text" id="detailName" required>
+        </div>
+        <div class="form-item">
+          <label>Telefono</label>
+          <input type="tel" id="detailPhone" placeholder="es. +39 333 1234567">
+        </div>
+        <div class="form-item">
+          <label>N. Coperti</label>
+          <input type="number" id="detailNumber" required min="1">
+        </div>
+        <div class="form-item">
+          <label>Data</label>
+          <input type="date" id="detailDate" onchange="checkDetailDateClosure()" required>
+        </div>
+        <div class="form-item">
+          <label>Ora</label>
+          <input type="time" id="detailTime" required>
+        </div>
+        <div class="form-item">
+          <label>Stato</label>
+          <select id="detailStatus">
+            <option value="confirmed">Confermata</option>
+            <option value="pending">In Attesa</option>
+            <option value="rejected">Rifiutata</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-item" style="margin-top:15px;">
+        <label>Note / Richieste Speciali</label>
+        <textarea id="detailNotes" rows="2"></textarea>
+      </div>
+
+      <div class="form-actions">
+        <button type="button" class="btn-danger" onclick="deleteReservation()">Elimina Prenotazione</button>
+        <button type="submit" id="btnSaveDetailBooking">Salva Modifiche</button>
+      </div>
+    </form>
+  </div>
+
+</div>
+
+<div id="toast"></div>
+
+<script>
+const SS_URL = "https://script.google.com/macros/s/AKfycbzFf8FH_mwegtrNGFc-yy-9DXwdpvUEYrDsdEyyOKbaRL5P28UGb7SpDXJJebtxgG07/exec";
+
+let reservations = [];
+let closures = [];
+let dragged = null;
+let selectedBooking = null;
+let viewMode = "week";
+
+const $ = id => document.getElementById(id);
+const todayStr = new Date().toISOString().split("T")[0];
+
+$("newDate").value = todayStr;
+$("filterDate").value = todayStr;
+
+function toast(msg, color = "var(--success)") {
+  const t = $("toast");
+  t.style.background = color;
+  t.textContent = msg;
+  t.style.display = "block";
+  setTimeout(() => t.style.display = "none", 3000);
+}
+
+function syncClosureEndDate() {
+  const startVal = $("closureStartDate").value;
+  if (startVal && !$("closureEndDate").value) {
+    $("closureEndDate").value = startVal;
+  }
+}
+
+function onFilterDateChange() {
+  render();
+  stats();
+}
+
+function updateAgendaTitle() {
+  const val = $("filterDate").value || todayStr;
+  const parts = val.split("-");
+  const d = new Date(parts[0], parts[1] - 1, parts[2]);
+  const monthName = d.toLocaleDateString("it-IT", { month: "long", year: "numeric" });
+
+  if (viewMode === "week") {
+    $("agendaTitle").textContent = `Agenda Prenotazioni Settimanale - ${monthName}`;
+  } else {
+    $("agendaTitle").textContent = `Agenda Prenotazioni Mensile - ${monthName}`;
+  }
+}
+
+function setViewMode(mode) {
+  viewMode = mode;
+  $("btnWeekView").classList.toggle("active", mode === "week");
+  $("btnMonthView").classList.toggle("active", mode === "month");
+  $("monthNav").style.display = mode === "month" ? "flex" : "none";
+  render();
+}
+
+function changeMonth(offset) {
+  const currentVal = $("filterDate").value || todayStr;
+  const parts = currentVal.split("-");
+  const d = new Date(parts[0], parts[1] - 1, parts[2] || 1);
+  d.setMonth(d.getMonth() + offset);
+  
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  
+  $("filterDate").value = `${y}-${m}-${day}`;
+  render();
+  stats();
+}
+
+function getWeekDays() {
+  const val = $("filterDate").value || todayStr;
+  const parts = val.split("-");
+  const d = new Date(parts[0], parts[1] - 1, parts[2]);
+  
+  const day = d.getDay() || 7;
+  d.setDate(d.getDate() - day + 1);
+  
+  return [...Array(7)].map((_, i) => {
+    const x = new Date(d);
+    x.setDate(d.getDate() + i);
+    return `${x.getFullYear()}-${String(x.getMonth() + 1).padStart(2, '0')}-${String(x.getDate()).padStart(2, '0')}`;
+  });
+}
+
+function getMonthDays() {
+  const val = $("filterDate").value || todayStr;
+  const parts = val.split("-");
+  const year = parseInt(parts[0], 10);
+  const month = parseInt(parts[1], 10) - 1;
+
+  const refDate = new Date(year, month, 1);
+  $("currentMonthLabel").textContent = refDate.toLocaleDateString("it-IT", { month: "long", year: "numeric" });
+
+  const firstDay = new Date(year, month, 1);
+  const lastDay = new Date(year, month + 1, 0);
+
+  let startDay = firstDay.getDay() || 7;
+  const days = [];
+
+  for (let i = 1; i < startDay; i++) days.push(null);
+  for (let d = 1; d <= lastDay.getDate(); d++) {
+    days.push(`${year}-${String(month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`);
+  }
+
+  return days;
+}
+
+async function fetchData() {
+  try {
+    const res = await fetch(SS_URL + "?action=read");
+    const data = await res.json();
+    reservations = data.reservations || [];
+    closures = data.closures || [];
+    render();
+    renderClosuresList();
+    stats();
+    checkFormDateClosure();
+  } catch (err) {
+    toast("Errore nel caricamento dati", "var(--danger)");
+  }
+}
+
+function checkFormDateClosure() {
+  const selectedDate = $("newDate").value;
+  const closedObj = closures.find(c => c.date === selectedDate);
+  const warningBanner = $("newBookingClosedWarning");
+  const submitBtn = $("btnSubmitNewBooking");
+
+  if (closedObj) {
+    warningBanner.style.display = "flex";
+    warningBanner.querySelector("span").innerHTML = `<b>Attenzione:</b> L'attività è CHIUSA il <b>${selectedDate}</b> (${closedObj.reason}). Non è possibile inserire prenotazioni.`;
+    submitBtn.disabled = true;
+  } else {
+    warningBanner.style.display = "none";
+    submitBtn.disabled = false;
+  }
+}
+
+function checkDetailDateClosure() {
+  const selectedDate = $("detailDate").value;
+  const closedObj = closures.find(c => c.date === selectedDate);
+  const warningBanner = $("detailBookingClosedWarning");
+  const saveBtn = $("btnSaveDetailBooking");
+
+  if (closedObj) {
+    warningBanner.style.display = "flex";
+    warningBanner.querySelector("span").innerHTML = `<b>Attenzione:</b> La data <b>${selectedDate}</b> risulta un giorno di CHIUSURA (${closedObj.reason}).`;
+    saveBtn.disabled = true;
+  } else {
+    warningBanner.style.display = "none";
+    saveBtn.disabled = false;
+  }
+}
+
+function render() {
+  updateAgendaTitle();
+
+  const agenda = $("agendaGrid");
+  agenda.innerHTML = "";
+
+  const datesToRender = viewMode === "week" ? getWeekDays() : getMonthDays();
+
+  datesToRender.forEach(date => {
+    if(!date) {
+      const emptyDiv = document.createElement("div");
+      emptyDiv.className = "day empty";
+      agenda.appendChild(emptyDiv);
+      return;
+    }
+
+    const isClosed = closures.find(c => c.date === date);
+    const div = document.createElement("div");
+    div.className = "day" + (date === todayStr ? " today" : "") + (isClosed ? " closed" : "");
+    div.dataset.date = date;
+
+    if (isClosed) {
+      const customColor = isClosed.color || "#dc2626";
+      div.style.backgroundColor = `${customColor}15`;
+      div.style.borderColor = customColor;
+    }
+
+    const parts = date.split("-");
+    const dObj = new Date(parts[0], parts[1] - 1, parts[2]);
+
+    const dayLabel = viewMode === "week" 
+      ? dObj.toLocaleDateString("it-IT", { weekday: "short", day: "numeric" })
+      : dObj.getDate();
+
+    let html = `<h4>${dayLabel}</h4>`;
+    if (isClosed) {
+      const customColor = isClosed.color || "#dc2626";
+      html += `<div class="closed-badge" style="background:${customColor};">CHIUSO: ${isClosed.reason}</div>`;
+    }
+    div.innerHTML = html;
+
+    if(!isClosed) {
+      div.addEventListener("dragover", e => { e.preventDefault(); div.classList.add("dragover"); });
+      div.addEventListener("dragleave", () => div.classList.remove("dragover"));
+      div.addEventListener("drop", async e => {
+        e.preventDefault();
+        div.classList.remove("dragover");
+        if(!dragged) return;
+        dragged.date = date;
+        await save(dragged);
+      });
+    }
+
+    reservations.filter(r => r.date === date).forEach(r => {
+      const b = document.createElement("div");
+      b.className = "booking " + r.status;
+      if(selectedBooking && selectedBooking.id === r.id) b.classList.add("selected");
+      b.draggable = true;
+      b.textContent = `${r.time} • ${r.name} (${r.number}p)`;
+
+      b.addEventListener("dragstart", () => { dragged = r; });
+      b.addEventListener("dragend", () => { dragged = null; });
+      b.addEventListener("click", () => selectBooking(r));
+
+      div.appendChild(b);
+    });
+
+    agenda.appendChild(div);
+  });
+}
+
+function renderClosuresList() {
+  const container = $("closuresList");
+  if(closures.length === 0) {
+    container.innerHTML = `<span class="empty-state">Nessuna chiusura pianificata</span>`;
+    return;
+  }
+  container.innerHTML = closures.map(c => `
+    <div class="closure-item">
+      <span>
+        <span class="closure-color-dot" style="background:${c.color || '#dc2626'};"></span>
+        <b>${c.date}</b>: ${c.reason}
+      </span>
+      <button class="btn-danger" onclick="removeClosure('${c.id}')">Rimuovi</button>
+    </div>
+  `).join("");
+}
+
+async function addClosure(e) {
+  e.preventDefault();
+  const startDate = $("closureStartDate").value;
+  const endDate = $("closureEndDate").value || startDate;
+  const reason = $("closureReason").value;
+  const color = $("closureColor").value;
+
+  if (endDate < startDate) {
+    alert("La data di fine non può essere precedente alla data d'inizio.");
+    return;
+  }
+
+  const params = new URLSearchParams();
+  params.set("action", "addClosure");
+  params.set("startDate", startDate);
+  params.set("endDate", endDate);
+  params.set("reason", reason);
+  params.set("color", color);
+
+  await fetch(SS_URL, { method: "POST", body: params });
+  toast("Periodo di chiusura aggiunto!");
+  $("closureStartDate").value = "";
+  $("closureEndDate").value = "";
+  $("closureReason").value = "";
+  fetchData();
+}
+
+async function removeClosure(id) {
+  const params = new URLSearchParams();
+  params.set("action", "deleteClosure");
+  params.set("id", id);
+  await fetch(SS_URL, { method: "POST", body: params });
+  toast("Chiusura rimossa");
+  fetchData();
+}
+
+async function createReservation(e) {
+  e.preventDefault();
+  const newDate = $("newDate").value;
+  
+  const isClosed = closures.find(c => c.date === newDate);
+  if (isClosed) {
+    alert(`L'attività è CHIUSA in data ${newDate} (${isClosed.reason}).`);
+    return;
+  }
+
+  const newBooking = {
+    id: Date.now().toString(),
+    name: $("newName").value,
+    phone: $("newPhone").value,
+    number: $("newNumber").value,
+    date: newDate,
+    time: $("newTime").value,
+    status: $("newStatus").value,
+    notes: $("newNotes").value
+  };
+
+  const params = new URLSearchParams();
+  params.set("action", "create");
+  Object.keys(newBooking).forEach(k => params.set(k, newBooking[k]));
+
+  const res = await fetch(SS_URL, { method: "POST", body: params });
+  const result = await res.json();
+
+  if (result.status === "error") {
+    toast(result.message, "var(--danger)");
+    return;
+  }
+
+  toast("Nuova prenotazione creata!");
+
+  $("newName").value = "";
+  $("newPhone").value = "";
+  $("newNotes").value = "";
+
+  fetchData();
+}
+
+function selectBooking(booking) {
+  selectedBooking = booking;
+
+  $("detailName").value = booking.name || "";
+  $("detailPhone").value = booking.phone || "";
+  $("detailNumber").value = booking.number || 1;
+  $("detailDate").value = booking.date || "";
+  $("detailTime").value = booking.time || "";
+  $("detailStatus").value = booking.status || "pending";
+  $("detailNotes").value = booking.notes || "";
+
+  $("emptyDetailText").style.display = "none";
+  $("detailForm").style.display = "block";
+
+  checkDetailDateClosure();
+  render();
+}
+
+async function saveDetails(e) {
+  e.preventDefault();
+  if(!selectedBooking) return;
+
+  const targetDate = $("detailDate").value;
+  const isClosed = closures.find(c => c.date === targetDate);
+  if (isClosed) {
+    alert(`L'attività è CHIUSA in data ${targetDate} (${isClosed.reason}).`);
+    return;
+  }
+
+  selectedBooking.name = $("detailName").value;
+  selectedBooking.phone = $("detailPhone").value;
+  selectedBooking.number = $("detailNumber").value;
+  selectedBooking.date = targetDate;
+  selectedBooking.time = $("detailTime").value;
+  selectedBooking.status = $("detailStatus").value;
+  selectedBooking.notes = $("detailNotes").value;
+
+  await save(selectedBooking);
+}
+
+async function deleteReservation() {
+  if(!selectedBooking || !confirm("Sei sicuro di voler eliminare questa prenotazione?")) return;
+
+  const params = new URLSearchParams();
+  params.set("action", "delete");
+  params.set("id", selectedBooking.id);
+  await fetch(SS_URL, { method: "POST", body: params });
+
+  toast("Prenotazione eliminata", "var(--danger)");
+  selectedBooking = null;
+  $("detailForm").style.display = "none";
+  $("emptyDetailText").style.display = "block";
+  fetchData();
+}
+
+async function save(data) {
+  const params = new URLSearchParams();
+  params.set("action", "update");
+  Object.keys(data).forEach(k => params.set(k, data[k]));
+  
+  const res = await fetch(SS_URL, { method: "POST", body: params });
+  const result = await res.json();
+  
+  if(result.status === "error") {
+    toast(result.message, "var(--danger)");
+  } else {
+    toast("Prenotazione aggiornata");
+  }
+  fetchData();
+}
+
+function stats() {
+  const filterVal = $("filterDate").value || todayStr;
+  const currentMonthYear = filterVal.substring(0, 7);
+
+  const daySeats = reservations
+    .filter(r => r.date === filterVal && r.status !== 'rejected')
+    .reduce((sum, r) => sum + parseInt(r.number || 0, 10), 0);
+
+  const monthSeats = reservations
+    .filter(r => r.date.startsWith(currentMonthYear) && r.status !== 'rejected')
+    .reduce((sum, r) => sum + parseInt(r.number || 0, 10), 0);
+
+  $("kpiDaySeats").textContent = daySeats;
+  $("kpiMonthSeats").textContent = monthSeats;
+}
+
+// Inizializzazione
+fetchData();
+</script>
+
+</body>
+</html>
